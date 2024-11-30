@@ -51,6 +51,7 @@ public class WebMvcConfiguration extends WebMvcConfigurationSupport {
         Docket docket = new Docket(DocumentationType.SWAGGER_2)
                 .apiInfo(apiInfo)
                 .select()
+                //最重要的一句 ↓ 如果没有这一句，尽管Api静态文档页面能显示，但是由于没有识别控制类，文档会没有内容
                 .apis(RequestHandlerSelectors.basePackage("com.sky.controller"))
                 .paths(PathSelectors.any())
                 .build();
@@ -62,6 +63,9 @@ public class WebMvcConfiguration extends WebMvcConfigurationSupport {
      * @param registry
      */
     protected void addResourceHandlers(ResourceHandlerRegistry registry) {
+        //如果没有这个方法里的代码，spring框架不会认为是在访问一个接口文档，而是一个控制器
+        log.info("开始设置静态资源映射...");
+        //自动用knife4j生成的文档，可以在浏览器中访问
         registry.addResourceHandler("/doc.html").addResourceLocations("classpath:/META-INF/resources/");
         registry.addResourceHandler("/webjars/**").addResourceLocations("classpath:/META-INF/resources/webjars/");
     }
