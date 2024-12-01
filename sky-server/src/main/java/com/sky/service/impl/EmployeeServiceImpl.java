@@ -121,4 +121,52 @@ public class EmployeeServiceImpl implements EmployeeService {
         return new PageResult(total,records);
     }
 
+    /**
+     * 启用禁用员工账号
+     * @param status
+     * @param id
+     */
+    public void enableOrDisable(Integer status, Long id) {
+        //最终发一个SQL：
+        //update employee set status=? where id=?
+
+        //这里当然可以new一个employee
+        //也可以这样做，用builder
+        Employee employee = Employee.builder()
+                .status(status)
+                .id(id)
+                .build();
+
+        //想做动态更新，更通用的写法
+        employeeMapper.update(employee);
+    }
+
+    /**
+     * 根据id查询员工信息
+     * @param id
+     * @return
+     */
+    public Employee getById(Long id) {
+        //调用持久层来查询，但是会返回密码，这是我们所不想暴露给用户的
+        Employee employee=employeeMapper.getById(id);
+        //稍微处理一下密码，调用set方法即可
+        employee.setPassword("****");
+        return employee;
+    }
+
+    /**
+     * 编辑员工信息
+     * @param employeeDTO
+     */
+    public void update(EmployeeDTO employeeDTO) {
+        //前面的知识
+        Employee employee = new Employee();
+        BeanUtils.copyProperties(employeeDTO,employee);
+        employee.setUpdateTime(LocalDateTime.now());
+        employee.setUpdateUser(BaseContext.getCurrentId());
+
+        //前面写好的方法起作用了，别急着高兴，注意下面这个方法传的是employee对象，需要进行属性拷贝
+        employeeMapper.update(employee);
+    }
+
 }
