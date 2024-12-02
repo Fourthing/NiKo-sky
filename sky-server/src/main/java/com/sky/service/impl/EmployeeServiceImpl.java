@@ -9,6 +9,7 @@ import com.sky.context.BaseContext;
 import com.sky.dto.EmployeeDTO;
 import com.sky.dto.EmployeeLoginDTO;
 import com.sky.dto.EmployeePageQueryDTO;
+import com.sky.dto.PasswordEditDTO;
 import com.sky.entity.Employee;
 import com.sky.exception.AccountLockedException;
 import com.sky.exception.AccountNotFoundException;
@@ -23,8 +24,6 @@ import org.springframework.util.DigestUtils;
 
 import java.time.LocalDateTime;
 import java.util.List;
-
-import static com.sky.constant.StatusConstant.ENABLE;
 
 @Service
 public class EmployeeServiceImpl implements EmployeeService {
@@ -167,6 +166,33 @@ public class EmployeeServiceImpl implements EmployeeService {
 
         //前面写好的方法起作用了，别急着高兴，注意下面这个方法传的是employee对象，需要进行属性拷贝
         employeeMapper.update(employee);
+    }
+
+    /**
+     * 修改密码
+     * @param passwordEditDTO
+     */
+    public void editPassword(PasswordEditDTO passwordEditDTO) {
+        //TODO 考虑前端的业务逻辑进行联调测试
+        //TODO 逻辑上来说应该加上新旧密码的比较,这两个不能相同;而且要重复两次输入新密码,这两次必须相同
+        Employee employee=employeeMapper.getById(passwordEditDTO.getEmpId());
+        Employee editEmployee = new Employee();
+        String oldPassword = DigestUtils.md5DigestAsHex(passwordEditDTO.getOldPassword().getBytes());
+        if (!oldPassword.equals(employee.getPassword())) {
+            //密码错误
+            throw new PasswordErrorException(MessageConstant.PASSWORD_ERROR);
+        }else{
+            //密码正确,注意新密码的MD5处理
+            editEmployee.setId(passwordEditDTO.getEmpId());
+            String newPassword=DigestUtils.md5DigestAsHex(passwordEditDTO.getNewPassword().getBytes());
+
+            //修改密码
+            editEmployee.setPassword(newPassword);
+            editEmployee.setUpdateTime(LocalDateTime.now());
+            editEmployee.setUpdateUser(BaseContext.getCurrentId());
+            //传editEmployee对象
+            employeeMapper.update(editEmployee);
+        }
     }
 
 }
