@@ -82,4 +82,17 @@ public class CategoryServiceImpl implements CategoryService {
                 build();
         categoryMapper.update(category);
     }
+
+    /**
+     * 修改分类
+     * @param categoryDTO
+     */
+    public void update(CategoryDTO categoryDTO) {
+        //我靠，直接tab补完了
+        Category category = new Category();
+        BeanUtils.copyProperties(categoryDTO, category);
+        category.setUpdateTime(LocalDateTime.now());
+        category.setUpdateUser(BaseContext.getCurrentId());
+        categoryMapper.update(category);
+    }
 }
