@@ -67,4 +67,19 @@ public class CategoryServiceImpl implements CategoryService {
         List<Category> records = page.getResult();
         return new PageResult(total,records);
     }
+
+    /**
+     * 启用、禁用分类
+     * @param status
+     * @param id
+     */
+    public void enableOrDisable(Integer status, Long id) {
+        //其实本质就是一个update
+        //更新数据需要传一个实体实例给mapper的update方法
+        Category category = Category.builder().
+                status(status).
+                id(id).
+                build();
+        categoryMapper.update(category);
+    }
 }

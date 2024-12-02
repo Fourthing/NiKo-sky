@@ -20,4 +20,6 @@ public interface CategoryMapper {
     void insert(Category category);
 
     Page<Category> pageQuery(CategoryPageQueryDTO categoryPageQueryDTO);
+
+    void update(Category category);
 }
