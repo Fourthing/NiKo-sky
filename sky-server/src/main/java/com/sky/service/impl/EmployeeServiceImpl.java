@@ -73,7 +73,6 @@ public class EmployeeServiceImpl implements EmployeeService {
      * @param employeeDTO
      */
     public void save(EmployeeDTO employeeDTO) {
-        //TODO
         Employee employee = new Employee();
 
         //一个一个属性赋值太麻烦
@@ -112,7 +111,7 @@ public class EmployeeServiceImpl implements EmployeeService {
 
         //开始分页查询
         PageHelper.startPage(employeePageQueryDTO.getPage(),employeePageQueryDTO.getPageSize());
-        Page<Employee>page=employeeMapper.pageQuery(employeePageQueryDTO);
+        Page<Employee> page=employeeMapper.pageQuery(employeePageQueryDTO);
 
         //加工成期望的返回结果
         long total=page.getTotal();
