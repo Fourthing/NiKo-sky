@@ -7,6 +7,8 @@ import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
+import java.util.List;
+
 @Mapper
 public interface CategoryMapper {
 
@@ -19,7 +21,23 @@ public interface CategoryMapper {
             " (#{type}, #{name}, #{sort}, #{status}, #{createTime}, #{updateTime}, #{createUser}, #{updateUser})")
     void insert(Category category);
 
+    /**
+     * 分页查询
+     * @param categoryPageQueryDTO
+     * @return
+     */
     Page<Category> pageQuery(CategoryPageQueryDTO categoryPageQueryDTO);
 
+    /**
+     * 根据id修改分类
+     * @param category
+     */
     void update(Category category);
+
+    /**
+     * 根据类型查询分类
+     * @param type
+     * @return
+     */
+    List<Category> findByType(Integer type);
 }

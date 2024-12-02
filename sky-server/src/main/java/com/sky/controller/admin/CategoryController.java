@@ -14,6 +14,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 /**
  * 分类管理
  */
@@ -75,5 +77,18 @@ public class CategoryController {
         log.info("修改分类");
         categoryService.update(categoryDTO);
         return Result.success();
+    }
+
+    /**
+     * 根据类型查询分类
+     * @param type
+     * @return
+     */
+    @GetMapping("list")
+    @ApiOperation("根据类型查询分类")
+    public Result<List<Category>> findByType(Integer type){
+        log.info("根据类型查询分类");
+        List<Category> list=categoryService.findByType(type);
+        return Result.success(list);
     }
 }
