@@ -91,4 +91,17 @@ public class CategoryController {
         List<Category> list=categoryService.findByType(type);
         return Result.success(list);
     }
+
+    /**
+     * 根据id删除分类
+     * @param id
+     * @return
+     */
+    @DeleteMapping
+    @ApiOperation("根据id删除分类")
+    public Result delete(Long id) {
+        log.info("根据id删除分类");
+        categoryService.delete(id);
+        return Result.success();
+    }
 }
