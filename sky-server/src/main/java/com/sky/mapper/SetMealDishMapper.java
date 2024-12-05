@@ -1,6 +1,7 @@
 package com.sky.mapper;
 
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Select;
 
 import java.util.List;
 
@@ -13,4 +14,6 @@ public interface SetMealDishMapper {
      * @return
      */
     List<Long> getSetMealIdsByDishIds(List<Long> dishIds);
+
+
 }
