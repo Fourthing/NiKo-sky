@@ -158,4 +158,31 @@ public class SetMealServiceImpl implements SetMealService {
 
         return setmealVO;
     }
+
+    /**
+     * 批量删除套餐
+     * @param ids
+     */
+    @Transactional
+    public void deleteBatch(List<Long> ids) {
+        //如果套餐处于起售状态则不能删除
+        for(Long id:ids){
+            Setmeal setmeal=setMealMapper.getById(id);
+            if(setmeal.getStatus()==StatusConstant.ENABLE){
+                throw new SetmealEnableFailedException(MessageConstant.SETMEAL_ON_SALE);
+            }
+        }
+
+        //用循环删除
+//        ids.forEach(setmealId -> {
+//            //删除套餐表中的数据
+//            setmealMapper.deleteById(setmealId);
+//            //删除套餐菜品关系表中的数据
+//            setmealDishMapper.deleteBySetmealId(setmealId);
+//        });
+
+        //批量删除，要注意有两个表数据要删除
+        setMealMapper.deleteBatchByIds(ids);
+        setMealDishMapper.deleteBatchBySetMealIds(ids);
+    }
 }

@@ -9,6 +9,8 @@ import com.sky.vo.SetmealVO;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Select;
 
+import java.util.List;
+
 @Mapper
 public interface SetMealMapper {
 
@@ -50,5 +52,9 @@ public interface SetMealMapper {
     @Select("select * from setmeal s where id = #{id}")
     Setmeal getById(Long id);
 
-
+    /**
+     * 根据套餐id批量删除套餐
+     * @param setMealIds
+     */
+    void deleteBatchByIds(List<Long> setMealIds);
 }
