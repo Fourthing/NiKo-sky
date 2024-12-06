@@ -2,15 +2,21 @@ package com.sky.service.impl;
 
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
+import com.sky.constant.MessageConstant;
+import com.sky.constant.StatusConstant;
 import com.sky.dto.SetmealDTO;
 import com.sky.dto.SetmealPageQueryDTO;
+import com.sky.entity.Dish;
 import com.sky.entity.Employee;
 import com.sky.entity.Setmeal;
 import com.sky.entity.SetmealDish;
+import com.sky.exception.SetmealEnableFailedException;
+import com.sky.mapper.DishMapper;
 import com.sky.mapper.SetMealDishMapper;
 import com.sky.mapper.SetMealMapper;
 import com.sky.result.PageResult;
 import com.sky.service.SetMealService;
+import com.sky.vo.DishVO;
 import com.sky.vo.SetmealVO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
@@ -29,6 +35,8 @@ public class SetMealServiceImpl implements SetMealService {
     private SetMealMapper setMealMapper;
     @Autowired
     private SetMealDishMapper setMealDishMapper;
+    @Autowired
+    private DishMapper dishMapper;
 
     /**
      * 新增套餐
@@ -55,7 +63,10 @@ public class SetMealServiceImpl implements SetMealService {
         setMealDishMapper.insertBatch(setMealDishList);
     }
 
-    @Override
+    /**
+     * 套餐分页查询
+     * @param setmealPageQueryDTO
+     */
     public PageResult pageQuery(SetmealPageQueryDTO setmealPageQueryDTO) {
         //基于SQL的limit关键字实现分页查询，后面的数字是具体的参数
         // select * from employee limit 0,10
@@ -68,5 +79,83 @@ public class SetMealServiceImpl implements SetMealService {
         long total=page.getTotal();
         List<SetmealVO> records=page.getResult();
         return new PageResult(total,records);
+    }
+
+    /**
+     * 套餐起售停售
+     * @param status
+     * @param id
+     */
+    public void enbaleOrDisable(Integer status, Long id) {
+        //考虑当套餐内包含停售的菜品，则不能起售
+        //起售套餐时，判断套餐内是否有停售菜品，有停售菜品提示"套餐内包含未启售菜品，无法启售"
+        if(status == StatusConstant.ENABLE){
+            //select d.* from dish d left join setmeal_dish s on d.id = s.dish_id where s.setmeal_id = #{setmealId}
+            List<Dish> dishList = dishMapper.getBySetMealId(id);
+            if(dishList != null && dishList.size() > 0){
+                dishList.forEach(dish -> {
+                    if(dish.getStatus() == StatusConstant.DISABLE){
+                        throw new SetmealEnableFailedException(MessageConstant.SETMEAL_ENABLE_FAILED);
+                    }
+                });
+            }
+        }
+
+        Setmeal setmeal=Setmeal.builder()
+                .status(status)
+                .id(id)
+                .build();
+
+        setMealMapper.update(setmeal);
+
+
+    }
+
+    /**
+     * 修改套餐（套餐中关联菜品也要更新）
+     * @param setmealDTO
+     */
+    @Transactional
+    public void updateWithDish(SetmealDTO setmealDTO) {
+        Setmeal setMeal = new Setmeal();
+        BeanUtils.copyProperties(setmealDTO, setMeal);
+        //需要在前端回显
+        //查setMeal表:SELECT * FROM set_meal s where s.id =#{id}
+        setMealMapper.getById(setMeal.getId());
+
+        //进行update修改基本信息
+        //对setMeal表进行操作
+        setMealMapper.update(setMeal);
+
+        //对于关联的套餐菜品数据需要额外处理:调用setMealDishMapper的方法update? 并不是
+        //对setMealDish表进行操作:先全部删除，再重新插入
+        setMealDishMapper.deleteBySetMealId(setMeal.getId());
+        List<SetmealDish> setMealDishList = setmealDTO.getSetmealDishes();
+        if(setMealDishList.size()>0 && setMealDishList!=null ){
+            setMealDishMapper.insertBatch(setMealDishList);
+        }
+
+    }
+
+    /**
+     * 根据id查询套餐（及其关联的菜品）
+     * @param id
+     * @return
+     */
+    @Transactional
+    public SetmealVO getByIdWithDishes(Long id) {
+        //很明显涉及两个表的数据
+        //先查setMeal表
+        Setmeal setmeal=setMealMapper.getById(id);
+
+        //再根据套餐id查setMealDish表
+        List<SetmealDish> setmealDishes=setMealDishMapper.getDishesBySetMealId(setmeal.getId());
+
+        //将查询结果封装到VO
+        SetmealVO setmealVO=new SetmealVO();
+        BeanUtils.copyProperties(setmeal,setmealVO);
+        setmealVO.setSetmealDishes(setmealDishes);
+
+        return setmealVO;
     }
 }

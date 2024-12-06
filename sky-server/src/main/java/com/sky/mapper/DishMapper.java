@@ -38,7 +38,7 @@ public interface DishMapper {
     Page<DishVO> pageQuery(DishPageQueryDTO dishPageQueryDTO);
 
     /**
-     * 根据id查询菜品
+     * 根据菜品id查询菜品
      * @param id
      * @return
      */
@@ -71,4 +71,12 @@ public interface DishMapper {
      * @return
      */
     List<Dish> list(Dish dish);
+
+    /**
+     * 根据套餐id查询菜品
+     * @param setmealId
+     * @return
+     */
+    @Select("select d.* from dish d left join setmeal_dish s on d.id = s.dish_id where s.setmeal_id = #{setmealId}")
+    List<Dish> getBySetMealId(Long setmealId);
 }

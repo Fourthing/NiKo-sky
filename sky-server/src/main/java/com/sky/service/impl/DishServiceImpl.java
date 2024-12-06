@@ -124,8 +124,6 @@ public class DishServiceImpl implements DishService {
      */
     public DishVO getByIdWithFlavor(Long id) {
         //要查两张表
-
-
         //先根据id查菜品表，调用之前写好的mapper方法
         Dish dish=dishMapper.getById(id);
 

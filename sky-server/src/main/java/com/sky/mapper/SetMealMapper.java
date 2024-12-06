@@ -6,7 +6,6 @@ import com.sky.dto.SetmealPageQueryDTO;
 import com.sky.entity.Setmeal;
 import com.sky.enumeration.OperationType;
 import com.sky.vo.SetmealVO;
-import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Select;
 
@@ -17,6 +16,7 @@ public interface SetMealMapper {
      * 新增套餐
      * @param setMeal
      */
+    @AutoFill(value=OperationType.INSERT)
     void insert(Setmeal setMeal);
 
     /**
@@ -31,7 +31,7 @@ public interface SetMealMapper {
      * 修改套餐信息
      * @param setmeal
      */
-    @AutoFill(value=OperationType.INSERT)
+    @AutoFill(value=OperationType.UPDATE)
     void update(Setmeal setmeal);
 
     /**
@@ -40,4 +40,15 @@ public interface SetMealMapper {
      * @return
      */
     Page<SetmealVO> pageQuery(SetmealPageQueryDTO setmealPageQueryDTO);
+
+    /**
+     * 根据id查询套餐
+     *
+     * @param id
+     * @return
+     */
+    @Select("select * from setmeal s where id = #{id}")
+    Setmeal getById(Long id);
+
+
 }
