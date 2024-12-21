@@ -5,10 +5,18 @@ sky:
     port: 3306
     database: sky_take_out
     username: root
-    password: Aa@123456789
+    password:
   alioss:
     endpoint: oss-cn-beijing.aliyuncs.com
     access-key-id:
     access-key-secret:
-    bucket-name: 
+    bucket-name:
+  redis:
+    host: localhost
+    port: 6379
+    password:
+    #    database: 0~16 不同的数据库之间数据是相互隔离的
 #    这么明文地填有风险吗？
+  wechat:
+    appid:
+    secret:
