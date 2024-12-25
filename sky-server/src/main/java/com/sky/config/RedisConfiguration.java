@@ -22,12 +22,13 @@ public class RedisConfiguration {
         //设置Redis中key的序列化器
         redisTemplate.setKeySerializer(new StringRedisSerializer());
 
-        // 设置value的序列化器
-        redisTemplate.setValueSerializer(new StringRedisSerializer());
+        //TODO 设置value的序列化器
+        //redisTemplate.setValueSerializer(new StringRedisSerializer());
+        //redisTemplate.setValueSerializer(new GenericJackson2JsonRedisSerializer());
 
-        //设置哈希类型的序列化器
-        redisTemplate.setHashKeySerializer(new StringRedisSerializer());
-        redisTemplate.setHashValueSerializer(new StringRedisSerializer());
+        //TODO 设置哈希类型的序列化器
+        //redisTemplate.setHashKeySerializer(new StringRedisSerializer());
+        //redisTemplate.setHashValueSerializer(new StringRedisSerializer());
 
         return redisTemplate;
     }
