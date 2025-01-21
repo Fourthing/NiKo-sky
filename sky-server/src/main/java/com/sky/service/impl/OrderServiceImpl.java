@@ -5,7 +5,6 @@ import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
 import com.sky.constant.MessageConstant;
 import com.sky.context.BaseContext;
-import com.sky.dto.OrderHistoryQueryDTO;
 import com.sky.dto.OrdersPageQueryDTO;
 import com.sky.dto.OrdersPaymentDTO;
 import com.sky.dto.OrdersSubmitDTO;
@@ -200,6 +199,71 @@ public class OrderServiceImpl implements OrderService {
         PageResult pageResult=new PageResult(total,records);
         return pageResult;
 
+    }
+
+    /**
+     * 取消订单
+     * 具体要求：
+     * 商家 已接单 状态下，用户取消订单需电话沟通商家
+     * 派送中 状态下，用户取消订单需电话沟通商家
+     * 如果在 待接单 状态下取消订单，需要给用户退款
+     * 取消订单后需要将订单状态修改为“已取消”
+     * @param id
+     */
+    public void cancelOrder(Long id) {
+        //先根据id查出订单
+        //订单状态 1待付款 2待接单 3已接单 4派送中 5已完成 6已取消
+        Orders ordersDB=orderMapper.getById(id);
+        // 1待支付 和 2待接单 状态下，用户可直接取消订单
+        if (ordersDB == null) {
+            throw new OrderBusinessException(MessageConstant.ORDER_NOT_FOUND);
+        }
+
+        if (ordersDB.getStatus() > 2) {
+            throw new OrderBusinessException(MessageConstant.ORDER_STATUS_ERROR);
+        }
+        Orders orders = new Orders();//避免数据污染，新建一个orders，新的订单对象只需要包含原来的id以及取消相关的字段
+        orders.setId(ordersDB.getId());
+
+        // 订单处于待接单状态下取消，需要进行退款
+        if (ordersDB.getStatus().equals(Orders.TO_BE_CONFIRMED)) {
+            //调用微信支付退款接口（这里跳过了）
+//                weChatPayUtil.refund(
+//                        ordersDB.getNumber(), //商户订单号
+//                        ordersDB.getNumber(), //商户退款单号
+//                        new BigDecimal(0.01),//退款金额，单位 元
+//                        new BigDecimal(0.01)
+//                );//原订单金额
+
+            //支付状态修改为 退款
+            orders.setPayStatus(Orders.REFUND);
+        }
+        // 更新订单状态、取消原因、取消时间
+        orders.setStatus(Orders.CANCELLED);
+        orders.setCancelReason("用户取消");
+        orders.setCancelTime(LocalDateTime.now());
+        orderMapper.update(orders);
+    }
+
+    /**
+     * 查询订单详情
+     *
+     * @param id
+     * @return
+     */
+    public OrderVO details(Long id) {
+        // 根据id查询订单
+        Orders orders = orderMapper.getById(id);
+
+        // 查询该订单对应的菜品/套餐明细
+        List<OrderDetail> orderDetailList = orderDetailMapper.getByOrderId(orders.getId());
+
+        // 将该订单及其详情封装到OrderVO并返回
+        OrderVO orderVO = new OrderVO();
+        BeanUtils.copyProperties(orders, orderVO);
+        orderVO.setOrderDetailList(orderDetailList);
+
+        return orderVO;
     }
 
 }
